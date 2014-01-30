@@ -1,5 +1,4 @@
 from ot.app import app
-import ac
 from ot.logger import Logger
 
 updateError = False
@@ -12,10 +11,10 @@ def acMain(ac_version):
     logger.debug("Starting OpenTracker")
 
     try:
-        ac.log('Hello from openTracker')
+        logger.logToAC('Hello from openTracker')
         app.onStartup()
     except Exception as e:
-        ac.log('Opentracker exception')
+        logger.logToAC('Opentracker exception')
         logger.exception('Error in openTracker onStartup: ' % e)
 
     return "OpenTracker"
@@ -28,7 +27,8 @@ def acUpdate(dt):
         return
 
     try:
-        app.onUpdate(dt)
+        return -1
+        #app.onUpdate(dt)
     except Exception as e:
         updateError = True
         logger.exception('Error in openTracker onUpdate: ' % e)
@@ -36,3 +36,4 @@ def acUpdate(dt):
 
 def acShutdown():
     app.onShutdown()
+    logger.logToAC('Successfully shut down')

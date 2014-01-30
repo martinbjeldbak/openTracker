@@ -1,28 +1,32 @@
 import ac
-import acsys
 from .logger import Logger
+#from .util import getCoords, steamID
+#from .ot import Host
+
+count = 0
 
 
 class App:
     def __init__(self, id):
         self.app_id = id
         self.logger = Logger()
+        #self.site = Host()
 
     def onStartup(self):
         self.logger.debug('Hello, testing from opentracker')
+        #self.steam_id = steamID()
 
     def onShutdown(self):
         self.logger.debug('OpenTracker successfully shutdown')
 
     def onUpdate(self, dt):
-        return None
+        global count
 
-    def getCoords():
-        x = ac.getCarState(0, acsys.CS.WorldPosition)[0]
-        y = ac.getCarState(0, acsys.CS.WorldPosition)[1]
-        z = ac.getCarState(0, acsys.CS.WorldPosition)[2]
-        #return {'x': x, 'y': y, 'z': z}
-        return dict(x=x, y=y, z=z)
-        #return None
+        if (count >= 1000):
+            count = 0
+        count = count + 1
+
+        #self.site.put(getCoords())
+
 
 app = App(ac.newApp('openTracker'))
