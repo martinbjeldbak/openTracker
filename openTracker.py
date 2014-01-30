@@ -27,8 +27,7 @@ def acUpdate(dt):
         return
 
     try:
-        return -1
-        #app.onUpdate(dt)
+        app.onUpdate(dt)
     except Exception as e:
         updateError = True
         logger.exception('Error in openTracker onUpdate: ' % e)
