@@ -1,6 +1,7 @@
 import ac
 import acsys
-import steam_info
+
+from steam_info.steam_info import get_steam_username, get_steam_id
 
 
 def getCoords():
@@ -9,5 +10,4 @@ def getCoords():
 
 
 def steamID():
-    return ""
-    #return steam_info.get_steam_id()
+    return str(get_steam_id())
