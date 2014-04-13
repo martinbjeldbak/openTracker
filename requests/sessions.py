@@ -12,12 +12,11 @@ import os
 from collections import Mapping
 from datetime import datetime
 
-from .compat import cookielib, OrderedDict, urljoin, urlparse, builtin_str
-from .cookies import (
-    cookiejar_from_dict, extract_cookies_to_jar, RequestsCookieJar, merge_cookies)
+from .compat import cookielib, OrderedDict, urljoin, urlparse, urlunparse
+from .cookies import cookiejar_from_dict, extract_cookies_to_jar, RequestsCookieJar
 from .models import Request, PreparedRequest
 from .hooks import default_hooks, dispatch_hook
-from .utils import to_key_val_list, default_headers, to_native_string
+from .utils import to_key_val_list, default_headers
 from .exceptions import TooManyRedirects, InvalidSchema
 from .structures import CaseInsensitiveDict
 
@@ -66,22 +65,6 @@ def merge_setting(request_setting, session_setting, dict_class=OrderedDict):
     return merged_setting
 
 
-def merge_hooks(request_hooks, session_hooks, dict_class=OrderedDict):
-    """
-    Properly merges both requests and session hooks.
-
-    This is necessary because when request_hooks == {'response': []}, the
-    merge breaks Session hooks entirely.
-    """
-    if session_hooks is None or session_hooks.get('response') == []:
-        return request_hooks
-
-    if request_hooks is None or request_hooks.get('response') == []:
-        return session_hooks
-
-    return merge_setting(request_hooks, session_hooks, dict_class)
-
-
 class SessionRedirectMixin(object):
     def resolve_redirects(self, resp, req, stream=False, timeout=None,
                           verify=True, cert=None, proxies=None):
@@ -111,7 +94,9 @@ class SessionRedirectMixin(object):
 
             # The scheme should be lower case...
             parsed = urlparse(url)
-            url = parsed.geturl()
+            parsed = (parsed.scheme.lower(), parsed.netloc, parsed.path,
+                      parsed.params, parsed.query, parsed.fragment)
+            url = urlunparse(parsed)
 
             # Facilitate non-RFC2616-compliant 'location' headers
             # (e.g. '/path/to/resource' instead of 'http://domain.tld/path/to/resource')
@@ -121,7 +106,7 @@ class SessionRedirectMixin(object):
             else:
                 url = requote_uri(url)
 
-            prepared_request.url = to_native_string(url)
+            prepared_request.url = url
 
             # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.4
             if (resp.status_code == codes.see_other and
@@ -129,13 +114,8 @@ class SessionRedirectMixin(object):
                 method = 'GET'
 
             # Do what the browsers do, despite standards...
-            # First, turn 302s into GETs.
-            if resp.status_code == codes.found and method != 'HEAD':
-                method = 'GET'
-
-            # Second, if a POST is responded to with a 301, turn it into a GET.
-            # This bizarre behaviour is explained in Issue 1704.
-            if resp.status_code == codes.moved and method == 'POST':
+            if (resp.status_code in (codes.moved, codes.found) and
+                    method not in ('GET', 'HEAD')):
                 method = 'GET'
 
             prepared_request.method = method
@@ -153,10 +133,7 @@ class SessionRedirectMixin(object):
             except KeyError:
                 pass
 
-            extract_cookies_to_jar(prepared_request._cookies,
-                                   prepared_request, resp.raw)
-            prepared_request._cookies.update(self.cookies)
-            prepared_request.prepare_cookies(prepared_request._cookies)
+            prepared_request.prepare_cookies(self.cookies)
 
             resp = self.send(
                 prepared_request,
@@ -256,7 +233,7 @@ class Session(SessionRedirectMixin):
         :class:`Session`.
 
         :param request: :class:`Request` instance to prepare with this
-            session's settings.
+        session's settings.
         """
         cookies = request.cookies or {}
 
@@ -265,8 +242,9 @@ class Session(SessionRedirectMixin):
             cookies = cookiejar_from_dict(cookies)
 
         # Merge with session cookies
-        merged_cookies = merge_cookies(
-            merge_cookies(RequestsCookieJar(), self.cookies), cookies)
+        merged_cookies = RequestsCookieJar()
+        merged_cookies.update(self.cookies)
+        merged_cookies.update(cookies)
 
 
         # Set environment's basic authentication if not explicitly set.
@@ -284,7 +262,7 @@ class Session(SessionRedirectMixin):
             params=merge_setting(request.params, self.params),
             auth=merge_setting(auth, self.auth),
             cookies=merged_cookies,
-            hooks=merge_hooks(request.hooks, self.hooks),
+            hooks=merge_setting(request.hooks, self.hooks),
         )
         return p
 
@@ -331,9 +309,6 @@ class Session(SessionRedirectMixin):
         :param cert: (optional) if String, path to ssl client cert file (.pem).
             If Tuple, ('cert', 'key') pair.
         """
-
-        method = builtin_str(method)
-
         # Create the Request.
         req = Request(
             method = method.upper(),
@@ -347,6 +322,9 @@ class Session(SessionRedirectMixin):
             hooks = hooks,
         )
         prep = self.prepare_request(req)
+
+        # Add param cookies to session cookies
+        self.cookies = cookiejar_from_dict(cookies, cookiejar=self.cookies, overwrite=False)
 
         proxies = proxies or {}
 
@@ -455,7 +433,7 @@ class Session(SessionRedirectMixin):
 
     def send(self, request, **kwargs):
         """Send a given PreparedRequest."""
-        # Set defaults that the hooks can utilize to ensure they always have
+        # Set default that the hooks can utilize to ensure they always have
         # the correct parameters to reproduce the previous request.
         kwargs.setdefault('stream', self.stream)
         kwargs.setdefault('verify', self.verify)

@@ -31,7 +31,6 @@ from .exceptions import (
 from .packages.ssl_match_hostname import CertificateError
 from .packages import six
 from .connection import (
-    port_by_scheme,
     DummyConnection,
     HTTPConnection, HTTPSConnection, VerifiedHTTPSConnection,
     HTTPException, BaseSSLError,
@@ -51,6 +50,12 @@ xrange = six.moves.xrange
 log = logging.getLogger(__name__)
 
 _Default = object()
+
+port_by_scheme = {
+    'http': 80,
+    'https': 443,
+}
+
 
 ## Pool objects
 
@@ -164,7 +169,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
 
     def _new_conn(self):
         """
-        Return a fresh :class:`HTTPConnection`.
+        Return a fresh :class:`httplib.HTTPConnection`.
         """
         self.num_connections += 1
         log.info("Starting new HTTP connection (%d): %s" %
@@ -174,14 +179,9 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
         if not six.PY3:  # Python 2
             extra_params['strict'] = self.strict
 
-        conn = self.ConnectionCls(host=self.host, port=self.port,
+        return self.ConnectionCls(host=self.host, port=self.port,
                                   timeout=self.timeout.connect_timeout,
                                   **extra_params)
-        if self.proxy is not None:
-            # Enable Nagle's algorithm for proxies, to avoid packet
-            # fragmentation.
-            conn.tcp_nodelay = 0
-        return conn
 
     def _get_conn(self, timeout=None):
         """
@@ -260,7 +260,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
     def _make_request(self, conn, method, url, timeout=_Default,
                       **httplib_request_kw):
         """
-        Perform a request on a given urllib connection object taken from our
+        Perform a request on a given httplib connection object taken from our
         pool.
 
         :param conn:
@@ -371,11 +371,9 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
         # TODO: Add optional support for socket.gethostbyname checking.
         scheme, host, port = get_host(url)
 
-        # Use explicit default port for comparison when none is given
         if self.port and not port:
+            # Use explicit default port for comparison when none is given.
             port = port_by_scheme.get(scheme)
-        elif not self.port and port == port_by_scheme.get(scheme):
-            port = None
 
         return (scheme, host, port) == (self.scheme, self.host, self.port)
 
@@ -463,13 +461,6 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
 
         conn = None
 
-        # Merge the proxy headers. Only do this in HTTP. We have to copy the
-        # headers dict so we can safely change it without those changes being
-        # reflected in anyone else's copy.
-        if self.scheme == 'http':
-            headers = headers.copy()
-            headers.update(self.proxy_headers)
-
         try:
             # Request a connection from the queue
             conn = self._get_conn(timeout=pool_timeout)
@@ -517,17 +508,17 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                 raise
 
         except (HTTPException, SocketError) as e:
+            if isinstance(e, SocketError) and self.proxy is not None:
+                raise ProxyError('Cannot connect to proxy. '
+                                 'Socket error: %s.' % e)
+
             # Connection broken, discard. It will be replaced next _get_conn().
             conn = None
             # This is necessary so we can access e below
             err = e
 
             if retries == 0:
-                if isinstance(e, SocketError) and self.proxy is not None:
-                    raise ProxyError('Cannot connect to proxy. '
-                                     'Socket error: %s.' % e)
-                else:
-                    raise MaxRetryError(self, url, e)
+                raise MaxRetryError(self, url, e)
 
         finally:
             if release_conn:
@@ -565,7 +556,7 @@ class HTTPSConnectionPool(HTTPConnectionPool):
 
     When Python is compiled with the :mod:`ssl` module, then
     :class:`.VerifiedHTTPSConnection` is used, which *can* verify certificates,
-    instead of :class:`.HTTPSConnection`.
+    instead of :class:`httplib.HTTPSConnection`.
 
     :class:`.VerifiedHTTPSConnection` uses one of ``assert_fingerprint``,
     ``assert_hostname`` and ``host`` in this order to verify connections.
@@ -652,10 +643,6 @@ class HTTPSConnectionPool(HTTPConnectionPool):
         conn = self.ConnectionCls(host=actual_host, port=actual_port,
                                   timeout=self.timeout.connect_timeout,
                                   **extra_params)
-        if self.proxy is not None:
-            # Enable Nagle's algorithm for proxies, to avoid packet
-            # fragmentation.
-            conn.tcp_nodelay = 0
 
         return self._prepare_conn(conn)
 
