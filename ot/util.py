@@ -11,3 +11,7 @@ def getCoords():
 
 def steamID():
     return str(get_steam_id())
+
+
+def steamUser():
+    return get_steam_username()
