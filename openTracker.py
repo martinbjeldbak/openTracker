@@ -12,7 +12,7 @@ def acMain(ac_version):
 
     try:
         logger.logToAC('Hello from openTracker')
-        app.onStartup()
+        app.onStartup(ac_version)
     except Exception as e:
         logger.logToAC('Opentracker exception')
         logger.exception('Error in openTracker onStartup: ' % e)

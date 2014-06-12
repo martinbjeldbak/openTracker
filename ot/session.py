@@ -5,11 +5,11 @@ import requests
 
 
 class Session:
-    def __init__(self):
+    def __init__(self, ac_version):
         self.url = 'http://127.0.0.1:3000'
         self.logger = Logger()
         # Send initial POST request
-        payload = {'session': getInitRequestData()}
+        payload = {'session': getInitRequestData(ac_version)}
         headers = {'content-type': 'application/json'}
         self.logger.info(payload)
         self.sessionToken = requests.post(self.url + '/api/v1/sessions',

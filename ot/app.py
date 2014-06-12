@@ -13,10 +13,11 @@ class App:
     def __init__(self, id):
         self.app_id = id
         self.logger = Logger()
-        self.session = Session()
 
-    def onStartup(self):
+    def onStartup(self, ac_version):
         self.steam_id = steamID()
+        self.ac_version = ac_version
+        self.session = Session(ac_version)
 
     def onShutdown(self):
         self.logger.debug('OpenTracker successfully shutdown')
