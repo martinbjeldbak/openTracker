@@ -21,7 +21,7 @@ class App:
         self.session = Session(ac_version)
 
     def onShutdown(self):
-        20+2
+        self.session.end()
 
     # This is called on every dt update, used for
     # important stuff that needs to be known right away
