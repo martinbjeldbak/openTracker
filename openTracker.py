@@ -1,14 +1,14 @@
 from ot.app import app
 from ot.logger import Logger
 
-updateError = False
 logger = Logger()
+ticks = 0
 
 
 def acMain(ac_version):
     global logger
 
-    logger.debug("Starting OpenTracker")
+    logger.info("Starting OpenTracker")
 
     try:
         logger.logToAC('Hello from openTracker')
@@ -21,18 +21,17 @@ def acMain(ac_version):
 
 
 def acUpdate(dt):
-    global updateError, logger
+    global logger, ticks
+    ticks += 1
 
-    if updateError:
-        return
+    app.onUpdate(dt)
 
-    try:
-        app.onUpdate(dt)
-    except Exception as e:
-        updateError = True
-        logger.exception('Error in openTracker onUpdate: ' % e)
+    if ticks >= 16:
+        app.updateRaceInfo()
+        ticks = 0
 
 
 def acShutdown():
     app.onShutdown()
+    logger.info('OpenTracker successfully shutdown')
     logger.logToAC('Successfully shut down')

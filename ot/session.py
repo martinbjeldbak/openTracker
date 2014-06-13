@@ -1,20 +1,30 @@
 from .logger import Logger
-from .config import getInitRequestData
+from .lap import Lap
+from .config import getInitRequestData, rootURL
 import json
 import requests
 
 
 class Session:
     def __init__(self, ac_version):
-        self.url = 'http://127.0.0.1:3000'
         self.logger = Logger()
-        # Send initial POST request
+
         payload = {'session': getInitRequestData(ac_version)}
         headers = {'content-type': 'application/json'}
-        self.logger.info(payload)
-        self.sessionToken = requests.post(self.url + '/api/v1/sessions',
-                                          data=json.dumps(payload),
-                                          headers=headers)
-        self.logger.info(self.sessionToken)
-    #def new_lap
-    #def new_point(x, y, z)
+        self.newSessResp = requests.post(rootURL + '/api/v1/sessions',
+                                         data=json.dumps(payload),
+                                         headers=headers)
+        self.sessKey = json.loads(self.newSessResp.text)['key']['key']
+        self.currentLap = 1
+        self.laps = [Lap(self.sessKey, self.currentLap)]
+
+    def getLatestLap(self):
+        return self.laps[-1]
+
+    def setLapNr(self, lapNr):
+        if self.currentLap < lapNr:
+            self.currentLap = lapNr
+            self.laps.append(Lap(self.sessKey, self.currentLap))
+
+    def setCoords(self, coords):
+        self.getLatestLap().setLatestPos(coords)

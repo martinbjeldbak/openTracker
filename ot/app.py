@@ -2,6 +2,7 @@ import sys
 sys.path.insert(0, 'apps/python/openTracker/DLLs')
 
 import ac
+import acsys
 from .logger import Logger
 from .util import getCoords, steamID
 from .session import Session
@@ -20,16 +21,17 @@ class App:
         self.session = Session(ac_version)
 
     def onShutdown(self):
-        self.logger.debug('OpenTracker successfully shutdown')
+        20+2
 
+    # This is called on every dt update, used for
+    # important stuff that needs to be known right away
     def onUpdate(self, dt):
-        global count
+        2+dt
 
-        count = count + 1
-
-        if (count >= 1000):
-            #self.site.put(getCoords())
-            count = 0
-
+    # This is not called as often, every 16 ticks
+    def updateRaceInfo(self):
+        cur_laps = ac.getCarState(0, acsys.CS.LapCount) + 1
+        self.session.setLapNr(cur_laps)
+        self.session.setCoords(getCoords())
 
 app = App(ac.newApp('openTracker'))
