@@ -13,13 +13,15 @@ class Lap:
         self.sessID = sessID
 
         payload = {'lap': {'lap_nr': self.lapNr}}
-        self.lapResp = requests.post(rootURL + '/api/v1/sessions/' + str(self.sessID) + '/laps',
-                                     data=json.dumps(payload),
-                                     headers=sessionAuthHeader(self.sessKey))
+        lapResp = requests.post(rootURL + '/api/v1/sessions/' + str(self.sessID) + '/laps',
+                                data=json.dumps(payload),
+                                headers=sessionAuthHeader(self.sessKey))
+        self.lapInfo = json.loads(lapResp.text)
 
     def setLatestPos(self, pos={'x': 0, 'y': 0, 'z': 0}):
         self.latestPos = pos
         payload = {'position': pos}
-        #requests.post(rootURL + '/api/v1/sessions/' + str(self.sessID) + '/laps',
-        #        data=json.dumps(payload),
-        #        headers=sessionAuthHeader(self.sessKey))
+        requests.post(rootURL + '/api/v1/sessions/' + str(self.sessID) +
+                      '/laps/' + str(self.lapInfo['id']) + '/positions/',
+                      data=json.dumps(payload),
+                      headers=sessionAuthHeader(self.sessKey))

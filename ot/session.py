@@ -13,10 +13,10 @@ class Session:
 
         payload = {'session': getInitRequestData(ac_version)}
         headers = {'content-type': 'application/json'}
-        self.newSessResp = requests.post(rootURL + '/api/v1/sessions',
-                                         data=json.dumps(payload),
-                                         headers=headers)
-        self.session = json.loads(self.newSessResp.text)
+        newSessResp = requests.post(rootURL + '/api/v1/sessions',
+                                    data=json.dumps(payload),
+                                    headers=headers)
+        self.session = json.loads(newSessResp.text)
         self.sessKey = self.session['key']['key']
         self.sessID = self.session['id']
 
