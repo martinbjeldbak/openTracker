@@ -20,3 +20,15 @@ def steamUser():
 def sessionAuthHeader(key):
     return {'content-type': 'application/json',
             'AUTHORIZATION': 'Token token="' + key + '"'}
+
+
+def eqByMargin(margin,
+               firstPos={'x': 0, 'y': 0, 'z': 0},
+               secondPos={'x': 0, 'y': 0, 'z': 0}):
+    isXEq = round(firstPos['x'], margin) == round(secondPos['x'], margin)
+    isYEq = round(firstPos['y'], margin) == round(secondPos['y'], margin)
+    isZEq = round(firstPos['z'], margin) == round(secondPos['z'], margin)
+
+    if isXEq and isYEq and isZEq:
+        return True
+    return False

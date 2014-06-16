@@ -26,7 +26,8 @@ class Session:
         self.setLapNr(1)
 
     def end(self):
-        payload = {'session': {'ended_at': strftime("%a, %d %b %Y %X +0000", gmtime())}}
+        payload = {'session': {'ended_at': strftime("%a, %d %b %Y %X +0000",
+                                                    gmtime())}}
         requests.put(rootURL + '/api/v1/sessions/' + str(self.session['id']),
                      data=json.dumps(payload),
                      headers=sessionAuthHeader(self.sessKey))
