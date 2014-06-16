@@ -15,3 +15,8 @@ def steamID():
 
 def steamUser():
     return get_steam_username()
+
+
+def sessionAuthHeader(key):
+    return {'content-type': 'application/json',
+            'AUTHORIZATION': 'Token token="' + key + '"'}

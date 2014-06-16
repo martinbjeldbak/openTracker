@@ -1,6 +1,7 @@
 from .logger import Logger
 from .lap import Lap
 from .config import getInitRequestData, rootURL
+from .util import sessionAuthHeader
 import json
 import requests
 from time import gmtime, strftime
@@ -17,19 +18,18 @@ class Session:
                                          headers=headers)
         self.session = json.loads(self.newSessResp.text)
         self.sessKey = self.session['key']['key']
+        self.sessID = self.session['id']
 
         # Set initial lap info
-        self.currentLap = 1
-        self.laps = [Lap(self.sessKey, self.currentLap)]
+        self.currentLap = float('-inf')
+        self.laps = []
+        self.setLapNr(1)
 
     def end(self):
         payload = {'session': {'ended_at': strftime("%a, %d %b %Y %X +0000", gmtime())}}
-
-        headers = {'content-type': 'application/json',
-                   'AUTHORIZATION': 'Token token="' + self.sessKey + '"'}
         requests.put(rootURL + '/api/v1/sessions/' + str(self.session['id']),
                      data=json.dumps(payload),
-                     headers=headers)
+                     headers=sessionAuthHeader(self.sessKey))
 
     def getLatestLap(self):
         return self.laps[-1]
@@ -37,7 +37,7 @@ class Session:
     def setLapNr(self, lapNr):
         if self.currentLap < lapNr:
             self.currentLap = lapNr
-            self.laps.append(Lap(self.sessKey, self.currentLap))
+            self.laps.append(Lap(self.sessKey, self.sessID, self.currentLap))
 
     def setCoords(self, coords):
         self.getLatestLap().setLatestPos(coords)
