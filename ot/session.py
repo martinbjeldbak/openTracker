@@ -40,5 +40,5 @@ class Session:
             self.currentLap = lapNr
             self.laps.append(Lap(self.sessKey, self.sessID, self.currentLap))
 
-    def setCoords(self, coords):
-        self.getLatestLap().setLatestPos(coords)
+    def setPosInfo(self, coords, speed, rpm):
+        self.getLatestLap().setPosInfo(coords, speed, rpm)
