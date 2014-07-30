@@ -17,7 +17,7 @@ class Session:
                                     data=json.dumps(payload),
                                     headers=headers)
         self.session = newSessResp.json()['session']
-        self.sessKey = self.session['key']['key']
+        self.sessKey = self.session['key']
         self.sessID = self.session['id']
 
         # Set initial lap info
