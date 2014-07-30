@@ -1,6 +1,6 @@
 import requests
-import json
 from .util import steamID
+from .logger import Logger
 
 version = 0.1
 rootURL = 'http://127.0.0.1:3000'
@@ -19,6 +19,6 @@ def getInitRequestData(ac_version):
 
 
 def steamIDtoUserID(steam_id):
-    response = requests.get(rootURL + '/users/search.json',
+    response = requests.get(rootURL + '/api/v1/users/search',
                             params={'q': steam_id})
-    return json.loads(response.text)[0]['id']
+    return response.json()['users'][0]['id']

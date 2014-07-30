@@ -30,10 +30,17 @@ class App:
 
     # This is not called as often, every 16 ticks
     def updateRaceInfo(self):
-        cur_laps = ac.getCarState(0, acsys.CS.LapCount) + 1
-        cur_speed = ac.getCarState(0, acsys.CS.SpeedMS)
-        cur_rpm = ac.getCarState(0, acsys.CS.RPM)
-        self.session.setLapNr(cur_laps)
-        self.session.setPosInfo(getCoords(), cur_speed, cur_rpm)
+        laps = ac.getCarState(0, acsys.CS.LapCount) + 1
+        speed = ac.getCarState(0, acsys.CS.SpeedMS)
+        rpm = ac.getCarState(0, acsys.CS.RPM)
+        gear = ac.getCarState(0, acsys.CS.Gear)
+        on_gas = ac.getCarState(0, acsys.CS.Gas)
+        on_brake = ac.getCarState(0, acsys.CS.Brake)
+        on_clutch = ac.getCarState(0, acsys.CS.Clutch)
+        steer_rot = ac.getCarState(0, acsys.CS.Steer)
+
+        self.session.setLapNr(laps)
+        self.session.setPosInfo(getCoords(), speed, rpm, gear,
+                                on_gas, on_brake, on_clutch, steer_rot)
 
 app = App(ac.newApp('openTracker'))

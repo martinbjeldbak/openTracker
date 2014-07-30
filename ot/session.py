@@ -16,7 +16,7 @@ class Session:
         newSessResp = requests.post(rootURL + '/api/v1/sessions',
                                     data=json.dumps(payload),
                                     headers=headers)
-        self.session = json.loads(newSessResp.text)
+        self.session = newSessResp.json()['session']
         self.sessKey = self.session['key']['key']
         self.sessID = self.session['id']
 
@@ -40,5 +40,7 @@ class Session:
             self.currentLap = lapNr
             self.laps.append(Lap(self.sessKey, self.sessID, self.currentLap))
 
-    def setPosInfo(self, coords, speed, rpm):
-        self.getLatestLap().setPosInfo(coords, speed, rpm)
+    def setPosInfo(self, coords, speed, rpm, gear, on_gas, on_brake,
+                   on_clutch, steer_rot):
+        self.getLatestLap().setPosInfo(coords, speed, rpm, gear, on_gas,
+                                       on_brake, on_clutch, steer_rot)
