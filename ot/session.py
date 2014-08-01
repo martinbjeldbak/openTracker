@@ -13,10 +13,10 @@ class Session:
 
         payload = {'session': getInitRequestData(ac_version)}
         headers = {'content-type': 'application/json'}
-        newSessResp = requests.post(rootURL + '/api/v1/sessions',
+        newSessResp = requests.post(rootURL + '/api/v1/race_sessions',
                                     data=json.dumps(payload),
                                     headers=headers)
-        self.session = newSessResp.json()['session']
+        self.session = newSessResp.json()['race_session']
         self.sessKey = self.session['key']
         self.sessID = self.session['id']
 
@@ -28,7 +28,7 @@ class Session:
     def end(self):
         payload = {'session': {'ended_at': strftime("%a, %d %b %Y %X +0000",
                                                     gmtime())}}
-        requests.put(rootURL + '/api/v1/sessions/' + str(self.session['id']),
+        requests.put(rootURL + '/api/v1/race_sessions/' + str(self.session['id']),
                      data=json.dumps(payload),
                      headers=sessionAuthHeader(self.sessKey))
 
