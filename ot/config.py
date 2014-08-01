@@ -19,6 +19,6 @@ def getInitRequestData(ac_version):
 
 
 def steamIDtoUserID(steam_id):
-    response = requests.get(rootURL + '/api/v1/users/search',
+    response = requests.get(rootURL + '/users/search.json',
                             params={'q': steam_id})
     return response.json()['users'][0]['id']

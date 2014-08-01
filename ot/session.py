@@ -11,9 +11,9 @@ class Session:
     def __init__(self, ac_version):
         self.logger = Logger()
 
-        payload = {'session': getInitRequestData(ac_version)}
+        payload = {'race_session': getInitRequestData(ac_version)}
         headers = {'content-type': 'application/json'}
-        newSessResp = requests.post(rootURL + '/api/v1/race_sessions',
+        newSessResp = requests.post(rootURL + '/race_sessions.json',
                                     data=json.dumps(payload),
                                     headers=headers)
         self.session = newSessResp.json()['race_session']
@@ -26,9 +26,9 @@ class Session:
         self.setLapNr(1)
 
     def end(self):
-        payload = {'session': {'ended_at': strftime("%a, %d %b %Y %X +0000",
+        payload = {'race_session': {'ended_at': strftime("%a, %d %b %Y %X +0000",
                                                     gmtime())}}
-        requests.put(rootURL + '/api/v1/race_sessions/' + str(self.session['id']),
+        requests.put(rootURL + '/race_sessions/' + str(self.session['id']) + ".json",
                      data=json.dumps(payload),
                      headers=sessionAuthHeader(self.sessKey))
 
