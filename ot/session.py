@@ -1,6 +1,6 @@
 from .logger import Logger
 from .lap import Lap
-from .config import getInitRequestData, rootURL
+from .config import getInitRequestData, rootURL, curUserID
 from .util import sessionAuthHeader
 import json
 import requests
@@ -13,7 +13,10 @@ class Session:
 
         payload = {'race_session': getInitRequestData(ac_version)}
         headers = {'content-type': 'application/json'}
-        newSessResp = requests.post(rootURL + '/race_sessions.json',
+        self.logger.debug("test 1")
+        self.logger.debug(rootURL + '/users/' + curUserID() + '/race_sessions.json')
+        self.logger.debug("test 2")
+        newSessResp = requests.post(rootURL + '/users/' + curUserID() + '/race_sessions.json',
                                     data=json.dumps(payload),
                                     headers=headers)
         self.session = newSessResp.json()['race_session']
@@ -28,7 +31,7 @@ class Session:
     def end(self):
         payload = {'race_session': {'ended_at': strftime("%a, %d %b %Y %X +0000",
                                                     gmtime())}}
-        requests.put(rootURL + '/race_sessions/' + str(self.session['id']) + ".json",
+        requests.put(rootURL + '/users/' + curUserID() + '/race_sessions/' + str(self.session['id']) + ".json",
                      data=json.dumps(payload),
                      headers=sessionAuthHeader(self.sessKey))
 
