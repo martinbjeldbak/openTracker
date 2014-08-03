@@ -13,9 +13,7 @@ class Session:
 
         payload = {'race_session': getInitRequestData(ac_version)}
         headers = {'content-type': 'application/json'}
-        self.logger.debug("test 1")
         self.logger.debug(rootURL + '/users/' + curUserID() + '/race_sessions.json')
-        self.logger.debug("test 2")
         newSessResp = requests.post(rootURL + '/users/' + curUserID() + '/race_sessions.json',
                                     data=json.dumps(payload),
                                     headers=headers)
