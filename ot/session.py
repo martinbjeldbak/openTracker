@@ -1,6 +1,6 @@
 from .logger import Logger
 from .lap import Lap
-from .config import getInitRequestData, rootURL, curUserID
+from .config import version, rootURL, curUserID
 from .util import sessionAuthHeader
 import json
 import requests
@@ -8,10 +8,13 @@ from time import gmtime, strftime
 
 
 class Session:
-    def __init__(self, ac_version):
+    def __init__(self, ac_version, driver, car, track, track_config):
         self.logger = Logger()
 
-        payload = {'race_session': getInitRequestData(ac_version)}
+        payload = {'race_session': {'ot_version': str(version),
+                   'user_agent': 'openTracker', 'ac_version': str(ac_version),
+                   'driver': driver, 'car': car, 'track': track,
+                   'track_config': track_config}}
         headers = {'content-type': 'application/json'}
         self.logger.debug(rootURL + '/users/' + curUserID() + '/race_sessions.json')
         newSessResp = requests.post(rootURL + '/users/' + curUserID() + '/race_sessions.json',

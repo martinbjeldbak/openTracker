@@ -18,7 +18,11 @@ class App:
     def onStartup(self, ac_version):
         self.steam_id = steamID()
         self.ac_version = ac_version
-        self.session = Session(ac_version)
+        driver = ac.getDriverName(0)
+        car = ac.getCarName(0)
+        track = ac.getTrackName(0)
+        track_config = ac.getTrackConfiguration(0)
+        self.session = Session(ac_version, driver, car, track, track_config)
 
     def onShutdown(self):
         self.session.end()

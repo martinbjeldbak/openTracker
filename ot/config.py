@@ -3,21 +3,9 @@ from .util import steamID
 from .logger import Logger
 
 version = 0.1
-rootURL = 'http://127.0.0.1:3000'
+rootURL = 'http://192.168.0.11:3000'
 
 __user_id = ""
-
-
-def getInitRequestData(ac_version):
-    ver = version
-
-    requestData = {
-        'ot_version': str(ver),
-        'ac_version': str(ac_version),
-        'user_agent': 'openTracker',
-        'user_id': curUserID()
-    }
-    return requestData
 
 
 def curUserID():
