@@ -13,8 +13,11 @@ class Session:
 
         payload = {'race_session': {'ot_version': str(version),
                    'user_agent': 'openTracker', 'ac_version': str(ac_version),
-                   'driver': driver, 'car': car, 'track': track,
-                   'track_config': track_config}}
+                   'driver': driver, 'car': car},
+                   'track': {'track': track,
+                             'track_config': track_config
+                             }
+                   }
         headers = {'content-type': 'application/json'}
         self.logger.debug(rootURL + '/users/' + curUserID() + '/race_sessions.json')
         newSessResp = requests.post(rootURL + '/users/' + curUserID() + '/race_sessions.json',
