@@ -3,6 +3,7 @@ sys.path.insert(0, 'apps/python/openTracker/DLLs')
 
 import ac
 import acsys
+import datetime
 from .logger import Logger
 from .util import getCoords, steamID, eqByMargin
 from .session import Session
@@ -24,6 +25,7 @@ class App:
         track_config = ac.getTrackConfiguration(0)
         self.session = Session(ac_version, driver, car, track, track_config)
         self.latestPos = getCoords()
+        self.latestUpdate = datetime.datetime.now()
 
     def onShutdown(self):
         self.session.end()
@@ -35,8 +37,10 @@ class App:
 
     # This is not called as often, every 16 ticks
     def updateRaceInfo(self):
-        if not eqByMargin(2, self.latestPos, getCoords()):
+        now = datetime.datetime.now()
+        if not eqByMargin(2, self.latestPos, getCoords()) or (now - self.latestUpdate).seconds > 2:
             self.latestPos = getCoords()
+            self.latestUpdate = now
             laps = ac.getCarState(0, acsys.CS.LapCount) + 1
             speed = ac.getCarState(0, acsys.CS.SpeedMS)
             rpm = ac.getCarState(0, acsys.CS.RPM)
