@@ -4,7 +4,7 @@ sys.path.insert(0, 'apps/python/openTracker/DLLs')
 import ac
 import acsys
 from .logger import Logger
-from .util import getCoords, steamID
+from .util import getCoords, steamID, eqByMargin
 from .session import Session
 
 count = 0
@@ -23,6 +23,7 @@ class App:
         track = ac.getTrackName(0)
         track_config = ac.getTrackConfiguration(0)
         self.session = Session(ac_version, driver, car, track, track_config)
+        self.latestPos = getCoords()
 
     def onShutdown(self):
         self.session.end()
@@ -34,17 +35,25 @@ class App:
 
     # This is not called as often, every 16 ticks
     def updateRaceInfo(self):
-        laps = ac.getCarState(0, acsys.CS.LapCount) + 1
-        speed = ac.getCarState(0, acsys.CS.SpeedMS)
-        rpm = ac.getCarState(0, acsys.CS.RPM)
-        gear = ac.getCarState(0, acsys.CS.Gear)
-        on_gas = ac.getCarState(0, acsys.CS.Gas)
-        on_brake = ac.getCarState(0, acsys.CS.Brake)
-        on_clutch = ac.getCarState(0, acsys.CS.Clutch)
-        steer_rot = ac.getCarState(0, acsys.CS.Steer)
+        if not eqByMargin(2, self.latestPos, getCoords()):
+            self.latestPos = getCoords()
+            laps = ac.getCarState(0, acsys.CS.LapCount) + 1
+            speed = ac.getCarState(0, acsys.CS.SpeedMS)
+            rpm = ac.getCarState(0, acsys.CS.RPM)
+            gear = ac.getCarState(0, acsys.CS.Gear)
+            on_gas = ac.getCarState(0, acsys.CS.Gas)
+            on_brake = ac.getCarState(0, acsys.CS.Brake)
+            on_clutch = ac.getCarState(0, acsys.CS.Clutch)
+            steer_rot = ac.getCarState(0, acsys.CS.Steer)
+            cur_lap_time_ms = ac.getCarState(0, acsys.CS.LapTime)
+            performance_meter = ac.getCarState(0, acsys.CS.PerformanceMeter)
 
-        self.session.setLapNr(laps)
-        self.session.setPosInfo(getCoords(), speed, rpm, gear,
-                                on_gas, on_brake, on_clutch, steer_rot)
+            best_lap = ac.getCarState(0, acsys.CS.BestLap)
+            last_lap = ac.getCarState(0, acsys.CS.LastLap)
+
+            self.session.setLapNr(laps, last_lap, best_lap)
+            self.session.setPosInfo(getCoords(), speed, rpm, gear,
+                                    on_gas, on_brake, on_clutch, steer_rot,
+                                    cur_lap_time_ms, performance_meter)
 
 app = App(ac.newApp('openTracker'))

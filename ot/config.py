@@ -3,7 +3,7 @@ from .util import steamID
 from .logger import Logger
 
 version = 0.1
-rootURL = 'http://192.168.0.11:3000'
+rootURL = 'http://192.168.0.20:3000'
 
 __user_id = ""
 

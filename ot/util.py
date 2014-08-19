@@ -19,7 +19,9 @@ def steamUser():
 
 def sessionAuthHeader(key):
     return {'content-type': 'application/json',
-            'AUTHORIZATION': 'Token token="' + key + '"'}
+            'AUTHORIZATION': 'Token token="' + key + '"',
+            'user_agent': 'openTracker'
+            }
 
 
 def eqByMargin(margin,
