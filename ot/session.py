@@ -19,7 +19,6 @@ class Session:
                              }
                    }
         headers = {'content-type': 'application/json'}
-        self.logger.debug(rootURL + '/users/' + curUserID() + '/race_sessions.json')
         newSessResp = requests.post(rootURL + '/users/' + curUserID() + '/race_sessions.json',
                                     data=json.dumps(payload),
                                     headers=headers)

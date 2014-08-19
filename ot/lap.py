@@ -12,7 +12,6 @@ class Lap:
         self.lapNr = lapNr
         self.sessID = sessID
         self.latestPos = {'x': -1000, 'y': -1000, 'z': -1000}
-        self.logger.debug("SUP")
         payload = {'lap': {'lap_nr': self.lapNr, 'last_lap': last_lap_ms,
                            'best_lap': best_lap_ms}}
 
