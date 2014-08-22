@@ -1,13 +1,12 @@
-from .logger import Logger
+from .logger import logger
 from .config import rootURL, curUserID
-from .util import sessionAuthHeader 
+from .util import sessionAuthHeader
 import json
 import requests
 
 
 class Lap:
     def __init__(self, sesskey, sessID, lapNr=1, last_lap_ms=0, best_lap_ms=-1):
-        self.logger = Logger()
         self.sessKey = sesskey
         self.lapNr = lapNr
         self.sessID = sessID

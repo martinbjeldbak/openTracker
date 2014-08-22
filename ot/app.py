@@ -4,7 +4,8 @@ sys.path.insert(0, 'apps/python/openTracker/DLLs')
 import ac
 import acsys
 import datetime
-from .logger import Logger
+import threading
+from .logger import logger
 from .util import getCoords, steamID, eqByMargin
 from .session import Session
 
@@ -14,7 +15,6 @@ count = 0
 class App:
     def __init__(self, id):
         self.app_id = id
-        self.logger = Logger()
 
     def onStartup(self, ac_version):
         self.steam_id = steamID()
@@ -37,6 +37,10 @@ class App:
 
     # This is not called as often, every 16 ticks
     def updateRaceInfo(self):
+        t = threading.Thread(target=self.sendInfo)
+        t.start()
+
+    def sendInfo(self):
         now = datetime.datetime.now()
         if not eqByMargin(2, self.latestPos, getCoords()) or (now - self.latestUpdate).seconds > 2:
             self.latestPos = getCoords()

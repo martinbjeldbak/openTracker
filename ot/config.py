@@ -1,9 +1,10 @@
 import requests
 from .util import steamID
-from .logger import Logger
+from .logger import logger
 
 version = 0.1
-rootURL = 'http://192.168.0.20:3000'
+#rootURL = 'http://192.168.0.20:3000'
+rootURL = 'http://opentracker.herokuapp.com'
 
 __user_id = ""
 

@@ -39,3 +39,4 @@ class Logger:
 
     def _ppMsg(self, msg):
         return " {0!s}: {1}".format(datetime.now(), msg)
+logger = Logger()

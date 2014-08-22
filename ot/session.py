@@ -1,4 +1,4 @@
-from .logger import Logger
+from .logger import logger
 from .lap import Lap
 from .config import version, rootURL, curUserID
 from .util import sessionAuthHeader
@@ -9,8 +9,6 @@ from time import gmtime, strftime
 
 class Session:
     def __init__(self, ac_version, driver, car, track, track_config):
-        self.logger = Logger()
-
         payload = {'race_session': {'ot_version': str(version),
                    'user_agent': 'openTracker', 'ac_version': str(ac_version),
                    'driver': driver, 'car': car},
