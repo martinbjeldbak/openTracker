@@ -64,4 +64,4 @@ class App:
                                     on_gas, on_brake, on_clutch, steer_rot,
                                     cur_lap_time_ms, performance_meter)
 
-app = App(ac.newApp('openTracker'))
+ot_app = App(ac.newApp('openTracker'))
